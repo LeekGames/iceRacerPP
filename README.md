@@ -7,7 +7,4 @@ How to use:
 What i use: 
     phaser.js https://phaser.io/ //html5-Game-Development-Framework
     
-#gppcc10 
-
-This is my first phaser-Game, I'm also new to advanced JavaScript-Programming.
-So, dont expect too much. The most code written is also not visible anymore ;)
+This is the further development Version of my original iceRacer. It contains some enchancements.
