@@ -144,6 +144,7 @@ async function endgame()
         gosound.play();
         await sleep(2000);
         gosound.stop();
+        saveIMG();
     }
 }
 
@@ -238,4 +239,11 @@ function getRandomInteger(min, max)
 function sleep(ms) 
 {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+var lastDataURL;
+function saveIMG()
+{
+    lastDataURL = document.getElementsByTagName("canvas")[0].toDataURL("png");
+    document.getElementById("hs").src = lastDataURL;
 }
