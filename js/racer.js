@@ -70,7 +70,7 @@ function update()
 {
     checkcollision();
     
-    if(space.isDown) 
+    if(space.downDuration(50)) 
     {
        if(running) running = false;
        else if(!gameover) running = true;
