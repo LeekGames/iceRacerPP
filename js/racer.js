@@ -23,6 +23,7 @@ var scoreboard;
 var score;
 var music;
 var gosound;
+var r;
 function create()
 {
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -48,7 +49,10 @@ function create()
     smallbarrier.body.allowGravity = false;
     
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+    game.input.keyboard.addKeyCapture(Phaser.Keyboard.SPACEBAR);
+    
+    r = game.input.keyboard.addKey(Phaser.Keyboard.R);
+    game.input.keyboard.addKeyCapture(Phaser.Keyboard.R);
     
     cursors = game.input.keyboard.createCursorKeys();
     
@@ -74,6 +78,11 @@ function update()
     {
        if(running) running = false;
        else if(!gameover) running = true;
+    }
+    
+    if(r.downDuration(10))
+    {
+        resetGame();
     }
     
     if(running)
@@ -130,6 +139,7 @@ function checkcollision()
     return (bighit || smallhit);
 }
 
+var gotxt;
 async function endgame()
 {
     if(!gameover)
@@ -138,7 +148,7 @@ async function endgame()
         gameover = true;
         vessel.body.velocity.y = 0;
         
-        game.add.text( 80, 194, "GAME OVER", { fontSize: '128px', fill: '#4d94ff' })
+        gotxt = game.add.text( 80, 194, "GAME OVER", { fontSize: '128px', fill: '#4d94ff' })
         
         music.stop();
         gosound.play();
@@ -246,4 +256,20 @@ function saveIMG()
 {
     lastDataURL = document.getElementsByTagName("canvas")[0].toDataURL("png");
     document.getElementById("hs").src = lastDataURL;
+}
+
+function resetGame()
+{
+    //Place Vessel back
+    vessel.x = 200;
+    vessel.y = 160;
+    
+    canyon.x = 0;
+    
+    bigbarrier.x = 2000;
+    smallbarrier.x = 1000;
+    
+    gotxt.destroy();
+    
+    gameover = false;
 }
