@@ -3,6 +3,8 @@ body
     font-family: "Lucida Sans Unicode";
     color: gray;
     background-color: lightblue;
+	background-image: url("img/background2.jpg");
+    background-repeat: repeat-x;
     font-size: x-large;
 }
 
@@ -17,5 +19,5 @@ body
 {
     position: fixed;
     left: 1em;
-    top: 6em;
+    top: 5em;
 }
