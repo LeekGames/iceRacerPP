@@ -183,10 +183,10 @@ function getPlaceX(big)
 {
     var x;
     
-    if(big == true) x = canyon.tilePosition.x + smallbarrier.x;
+    if(big == true)x = canyon.tilePosition.x + smallbarrier.x;
     else x = canyon.tilePosition.x +  bigbarrier.x;
     
-    var nx = canyon.tilePosition.x + getRandomInteger(1400,1600);
+    var nx = canyon.tilePosition.x + getRandomInteger(vessel.x+2000,x+2500);
     var i = 5;
     while(i > 0)
     {
@@ -194,7 +194,7 @@ function getPlaceX(big)
         {
             if(!(nx > (x+256)))
             {
-                nx = canyon.tilePosition.x + getRandomInteger(1400,3200);
+                nx = canyon.tilePosition.x + getRandomInteger(vessel.x + 2000,x+2500);
             }
             else i = 0;
         }
@@ -208,8 +208,8 @@ function getPlaceY(big)
 {
     var y;
     
-    if(big == true) y = smallbarrier.y;
-    else y = bigbarrier.y;
+    if(big == true) y = smallbarrier.y - (smallbarrier.y - vessel.y);
+    else y = bigbarrier.y - (smallbarrier.y - vessel.y);
     
     var ny = getRandomInteger(50,420);
     var i = 5;
@@ -231,17 +231,7 @@ function getPlaceY(big)
 
 function getRandomInteger(min, max)
 {
-    /*
-    var bool = false;
-    var rnd;
-    while(!bool)
-    {
-        rnd = Math.random() * max;
-        if(rnd > min) return rnd;
-        else bool = false;
-    }*/
-    //return Math.floor(Math.random() * (max - min + 1) + min);
-    var r =  Math.floor( Math.random() * (max + 1 - min) + min );
+    var r = Math.floor( Math.random() * (max + 1 - min) + min );
     console.log("min:"+min+" out:"+r+" max:"+max);
     return r;
 }
@@ -266,7 +256,7 @@ function resetGame()
     
     canyon.x = 0;
     
-    bigbarrier.x = 2000;
+    bigbarrier.x = 200;
     smallbarrier.x = 1000;
     
     gotxt.destroy();
