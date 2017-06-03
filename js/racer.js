@@ -37,7 +37,7 @@ var goScreen;
 var scoreboard;
 var slomoDisplay;
 var distanceDisplay;
-
+var slomo;
 function create()
 {
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -71,13 +71,16 @@ function create()
     
 	//Create Keyboard-inputs
     space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    game.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+    game.input.keyboard.addKeyCapture(Phaser.Keyboard.SPACEBAR);
 
 	esc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	game.input.keyboard.addKeyCapture([ Phaser.Keyboard.ESC]);
 
 	slomo = game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_0);
-	game.input.keyboard.addKeyCapture([ Phaser.Keyboard.NUMPAD_0 ]);
+	game.input.keyboard.addKeyCapture(Phaser.Keyboard.NUMPAD_0);
+	
+	r = game.input.keyboard.addKey(Phaser.Keyboard.R);
+    game.input.keyboard.addKeyCapture(Phaser.Keyboard.R);
     
     cursors = game.input.keyboard.createCursorKeys();
     
@@ -110,18 +113,20 @@ var movementInk = 1;
 var enableAllKeys = false;
 function update()
 {
-	if(space.isDown) 
+	if(space.downDuration(10)) 
 	{
-		enableAllKeys=true
-		if(!gameover) 
-			running = true;
+		enableAllKeys=true;
+		if(!gameover) running = true;
 	}
+	
+	if(r.downDuration(10)) resetGame();
 	
     gameover = checkcollision();
     
 	if(gameover)
 	{ 
 		speed = 0;
+		running = false;
 	}
 	else if(enableAllKeys)
 	{
@@ -132,10 +137,8 @@ function update()
 
 		if(cursors.left.isDown && slomoPerc>0)
 		{
-			if(running) 
-				running=false;
-			else 
-				running = true;
+			if(running) running=false;
+			else running = true;
 			slomoPerc--;
 			slomoActive = true;
 		}
@@ -203,13 +206,10 @@ function update()
 				speedInk += 40;
 				movementInk+=0.25;
 			}
-		
-			if(cursors.down.isDown && !cursors.up.isDown) 
-				vessel.body.velocity.y = (speed + 420) * movementInk; 
-			else if(cursors.up.isDown && !cursors.down.isDown) 
-				vessel.body.velocity.y = -(speed + 420) * movementInk;
-			else if(!cursors.up.isDown && !cursors.up.isDown) 
-				vessel.body.velocity.y = 0;
+		    
+			if(cursors.down.isDown && !cursors.up.isDown) vessel.body.velocity.y = (speed + 420) * movementInk; 
+			else if(cursors.up.isDown && !cursors.down.isDown) vessel.body.velocity.y = -(speed + 420) * movementInk;
+			else if(!cursors.up.isDown && !cursors.up.isDown) vessel.body.velocity.y = 0;
 
 			scoreboard.text = "SCORE: " + score;
 			speed += 0.005;
@@ -240,6 +240,8 @@ function checkcollision()
 }
 
 var gotxt;
+var button;
+var deathvessel;
 async function endgame()
 {
     if(!gameover)
@@ -252,22 +254,21 @@ async function endgame()
 		//goScreen.position.y = 0;
 
 		//Explosion at death
-		var deathvessel = game.add.sprite(160, 200, 'vesselExplode');
+		vessel.loadTexture('vesselExplode')
 		//deathvessel.bringToTop();
 		scoreboard.bringToTop();
 		slomoDisplay.bringToTop();
 		distanceDisplay.bringToTop();
 
-		var anima = deathvessel.animations.add('anima');	//Prep for Animation
-		deathvessel.animations.play('anima', 12, false);	//Start of Vessel-Animation
-		deathvessel.angle += 90;        
-		deathvessel.position.x = vessel.position.x;
-		deathvessel.position.y = vessel.position.y;
-		vessel.kill();
+		var anima = vessel.animations.add('anima');	//Prep for Animation
+		vessel.animations.play('anima', 12, false);	//Start of Vessel-Animation
+		vessel.position.x = vessel.position.x;
+		vessel.position.y = vessel.position.y;
+		//vessel.visible == false;
 
-        game.add.text( 137, 194, "Game Over", { fontSize: '128px', fill: '#4d94ff' })
+        gotxt = game.add.text( 137, 194, "Game Over", { fontSize: '128px', fill: '#4d94ff' })
         
-		button = game.add.button(game.world.centerX - (320/2), 350, 'restartButton', restartGame, this, 2, 1, 0);
+		button = game.add.button(game.world.centerX - (320/2), 350, 'restartButton', resetGame, this, 2, 1, 0);
 
         music.stop();
         gosound.play();
@@ -275,11 +276,6 @@ async function endgame()
         gosound.stop();
 
     }
-}
-
-function restartGame()
-{
-	window.location.reload(false); 
 }
 
 function placeBarrier(big)
@@ -376,16 +372,22 @@ function saveIMG()
 
 function resetGame()
 {
-    //Place Vessel back
-    vessel.x = 200;
-    vessel.y = 160;
     
+    bigbarrier.x = -100;
+    smallbarrier.x = -100;
+    
+    //Place Vessel back
+    vessel.loadTexture('vessel');
+    anim = vessel.animations.add('anim');
+	vessel.animations.play('anim', 5, true);
+	
+	speed = 8;
+	
     canyon.x = 0;
     
-    bigbarrier.x = 200;
-    smallbarrier.x = 1000;
-    
     gotxt.destroy();
+    button.destroy();
     
     gameover = false;
+    running = true;
 }
