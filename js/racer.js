@@ -385,6 +385,9 @@ function resetGame()
 	
     canyon.x = 0;
     
+    placeBarrier(true);
+    placeBarrier(false);
+    
     gotxt.destroy();
     button.destroy();
     
