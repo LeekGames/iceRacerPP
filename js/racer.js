@@ -1,7 +1,6 @@
 /*global Phaser*/
 
-//new Phaser.Game(width, height, renderer, parent object, default state, transparent, antialising, physicsConfig)
-var game = new Phaser.Game(964,536,Phaser.CANVAS,'game', { preload: preload, create: create, update: update }, true, false);
+var game = new Phaser.Game(964, 536, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update }, true, false);
     
 function preload()
 {
@@ -11,9 +10,11 @@ function preload()
     game.load.image("barrier-small", "assets/barrier-small.png");
 	game.load.spritesheet('vessel', 'assets/spritesheets/vessel.png', 112, 120, 4);
 	game.load.spritesheet('vesselExplode', 'assets/spritesheets/vessel_explode.png', 112,120,6);
-	game.load.image('restartButton', 'assets/button_restart.jpg');    
-	//game.load.image('gameoverBackground', 'assets/gameover_screen.png');
+	game.load.image('restartButton', 'assets/button_restart.jpg');
 	
+	game.load.image('mute', 'assets/mute.png');
+	game.load.image('sound', 'assets/sound.png');
+
     game.load.audio('music', "assets/music.wav");
     game.load.audio("msgo", "assets/gameover.wav");
 }
@@ -25,40 +26,37 @@ var canyon;
 var bigbarrier;
 var smallbarrier;
 var barriers;
-var scoreboard;
 var score;
 var music;
 var gosound;
-var r;
 
 var goScreen;
+var muteButton;
+var soundMuted = false;
 
 //Displays
 var scoreboard;
-var slomoDisplay;
+var cryoDisplay;
 var distanceDisplay;
-var slomo;
 function create()
 {
-    game.physics.startSystem(Phaser.Physics.P2JS);
+    game.physics.startSystem(Phaser.Physics.ARCADE);
 
     canyon = game.add.tileSprite(0, 0, 964, 536,'canyon');
     
     score = 0;
     scoreboard = game.add.text(790, 498, "SCORE: 0", { fontSize: '32px', fill: '#4d94ff' });
 
-	slomoDisplay = game.add.text(25, 498-5, "Cryogen: 100%", { fontSize: '16px', fill: '#4d94ff' });
+	cryoDisplay = game.add.text(25, 498-5, "Cryogen: 100%", { fontSize: '16px', fill: '#4d94ff' });
 	distanceDisplay = game.add.text(25, 498+16+5, "Distance: 0", { fontSize: '16px', fill: '#4d94ff' });
 
     vessel = game.add.sprite (160, 200, 'vessel');
-	anim = vessel.animations.add('anim');	//Prep for Animation
+	anim = vessel.animations.add('anim');		//Prep for Animation
 	vessel.animations.play('anim', 5, true);	//Start of Vessel-Animation
     vessel.angle += 90;
     game.physics.arcade.enable(vessel);
     vessel.body.collideWorldBounds = true;
     vessel.body.allowGravity = false;
-    
-	//goScreen = game.add.sprite(1600, 2000, 'gameoverBackground');
 
     barriers = game.add.group();
     barriers.enableBody = true;
@@ -75,12 +73,15 @@ function create()
 
 	esc = game.input.keyboard.addKey(Phaser.Keyboard.ESC);
 	game.input.keyboard.addKeyCapture([ Phaser.Keyboard.ESC]);
-
-	slomo = game.input.keyboard.addKey(Phaser.Keyboard.NUMPAD_0);
-	game.input.keyboard.addKeyCapture(Phaser.Keyboard.NUMPAD_0);
 	
 	r = game.input.keyboard.addKey(Phaser.Keyboard.R);
     game.input.keyboard.addKeyCapture(Phaser.Keyboard.R);
+	
+	m = game.input.keyboard.addKey(Phaser.Keyboard.M);
+    game.input.keyboard.addKeyCapture(Phaser.Keyboard.M);
+
+	f5 = game.input.keyboard.addKey(Phaser.Keyboard.F5);
+	game.input.keyboard.addKeyCapture(Phaser.Keyboard.F5);
     
     cursors = game.input.keyboard.createCursorKeys();
     
@@ -90,22 +91,27 @@ function create()
     music.volume = 0.2;
     gosound = game.add.audio("msgo");
     gosound.volume = 0.3;
+
+	muteButton = game.add.button(920, 5, 'sound', muteSound, this, 2, 1, 0);	
+
 }
 
 //Keyboard Inputs
 var cursors;
 var space;
 var esc;
+var r;
+var m;
+var f5;
 
 //others
 var running = false;
 var distance = 0;
 var cursors;
 var speed = 8;
-var speedFactor = 20;
-var slomoPerc = 100;
-var slomoTemp = 0;
-var slomoActive=false;
+var cryoPerc = 100;
+var cryoTemp = 0;
+var cryoActive=false;
 var gameover = false;
 var maxSize = 10;
 var speedInk = 15;
@@ -119,10 +125,13 @@ function update()
 		if(!gameover) running = true;
 	}
 	
-	if(r.downDuration(10)) resetGame();
-	
     gameover = checkcollision();
     
+	
+	if(r.downDuration(10) && gameover) resetGame();
+	if(f5.downDuration(10) && gameover) resetGame();
+
+
 	if(gameover)
 	{ 
 		speed = 0;
@@ -130,47 +139,52 @@ function update()
 	}
 	else if(enableAllKeys)
 	{
+		
+		if(m.downDuration(10))
+		{
+			muteSound();
+		}
 		if(esc.isDown)
 		{
 			running = false;
 		}
 
-		if(cursors.left.isDown && slomoPerc>0)
+		if(cursors.left.isDown && cryoPerc>0)
 		{
 			if(running) running=false;
 			else running = true;
-			slomoPerc--;
-			slomoActive = true;
+			cryoPerc--;
+			cryoActive = true;
 		}
-		else if(slomoPerc == 0)
+		else if(cryoPerc == 0)
 		{
-			slomoActive = false;
+			cryoActive = false;
 			running = true;
 		}
 		
-		if(slomoActive && !cursors.left.isDown)
+		if(cryoActive && !cursors.left.isDown)
 		{
 			running = true;
-			slomoActive = false;
+			cryoActive = false;
 		}
 
-		slomoTemp++;
-		if(!slomoActive && slomoTemp >= 15)
+		cryoTemp++;
+		if(!cryoActive && cryoTemp >= 15)
 		{
-			slomoTemp = 0;
-			if(slomoPerc != 100) 
-				slomoPerc++;
+			cryoTemp = 0;
+			if(cryoPerc != 100) 
+				cryoPerc++;
 		}
-		slomoDisplay.text = "Cryogen: "+slomoPerc+"%";
-		slomoDisplay.bringToTop();
+		cryoDisplay.text = "Cryogen: "+cryoPerc+"%";
+		cryoDisplay.bringToTop();
 
-		if(slomoPerc<20 && slomoPerc>=0)
+		if(cryoPerc<20 && cryoPerc>=0)
 		{
-			slomoDisplay.addColor('#ff0000', 0);
+			cryoDisplay.addColor('#ff0000', 0);
 		}
 		else
 		{
-			slomoDisplay.addColor('#4d94ff', 0);
+			cryoDisplay.addColor('#4d94ff', 0);
 		}
 
 		if(running)
@@ -218,6 +232,26 @@ function update()
 	}
 }
 
+function muteSound()
+{
+	if(soundMuted)
+	{
+		music.volume = 0.2;
+		gosound.volume = 0.2;
+		muteButton.kill();
+		muteButton = game.add.button(920, 5, 'sound', muteSound, this, 2, 1, 0);
+		soundMuted = false;
+	}
+	else
+	{
+		music.volume = 0;
+		gosound.volume = 0;
+		muteButton.kill();
+		muteButton = game.add.button(920, 5, 'mute', muteSound, this, 2, 1, 0);
+		soundMuted = true;
+	}
+}
+
 function checkcollision()
 {
     var bighit;
@@ -249,22 +283,14 @@ async function endgame()
         running = false;
         gameover = true;
         vessel.body.velocity.y = 0;
-	
-		//goScreen.position.x = 0;
-		//goScreen.position.y = 0;
 
 		//Explosion at death
 		vessel.loadTexture('vesselExplode')
-		//deathvessel.bringToTop();
-		scoreboard.bringToTop();
-		slomoDisplay.bringToTop();
-		distanceDisplay.bringToTop();
 
 		var anima = vessel.animations.add('anima');	//Prep for Animation
 		vessel.animations.play('anima', 12, false);	//Start of Vessel-Animation
 		vessel.position.x = vessel.position.x;
 		vessel.position.y = vessel.position.y;
-		//vessel.visible == false;
 
         gotxt = game.add.text( 137, 194, "Game Over", { fontSize: '128px', fill: '#4d94ff' })
         
@@ -375,6 +401,10 @@ function resetGame()
     
     bigbarrier.x = -100;
     smallbarrier.x = -100;
+
+	distance = 0;
+	score = 0;
+	cryoPerc = 100;
     
     //Place Vessel back
     vessel.loadTexture('vessel');
@@ -391,6 +421,10 @@ function resetGame()
     gotxt.destroy();
     button.destroy();
     
+	music.play();
+    music.volume = 0.2;
+	gosound.volume = 0.2;
+	
     gameover = false;
     running = true;
 }
