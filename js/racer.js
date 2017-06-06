@@ -40,7 +40,7 @@ var distanceDisplay;
 var slomo;
 function create()
 {
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.physics.startSystem(Phaser.Physics.P2JS);
 
     canyon = game.add.tileSprite(0, 0, 964, 536,'canyon');
     
