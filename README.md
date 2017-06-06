@@ -7,6 +7,6 @@ How to use:
 What i use: 
     phaser.js https://phaser.io/ //html5-Game-Development-Framework
     
-This is the further development Version of my original iceRacer. It contains some enchancements.
+This is the further development Version of the original iceRacer. It contains many enchancements.
 
-The newest development-Version is playable at http://iceracer.amc2000.de/
+The newest development-Version is always playable at http://iceracer.amc2000.de/
