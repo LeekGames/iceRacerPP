@@ -1,0 +1,6 @@
+Im SSH Terminal eingeben: 
+git pull origin master
+//Dann eigene Änderungen reinkopieren
+git add .
+git commit -m "Kurzinfo über änderungen eintragen"
+git push origin master
